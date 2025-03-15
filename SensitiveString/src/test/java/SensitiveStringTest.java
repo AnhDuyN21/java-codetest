@@ -1,6 +1,5 @@
 
 
-import org.example.SensitiveString;
 import org.junit.Test;
 
 import java.util.Arrays;

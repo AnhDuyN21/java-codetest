@@ -1,6 +1,6 @@
 package org.example;
 
-public interface ISensitiveString {
+public interface SensitiveString {
     char[] getValue();
     String display();
     void clear();

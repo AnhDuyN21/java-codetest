@@ -1,15 +1,30 @@
 package org.example;
 
-public class MaskedSensitiveString extends SensitiveStringDecorator{
+import java.util.Arrays;
 
+public class MaskedSensitiveString implements SensitiveString {
 
-    public MaskedSensitiveString(ISensitiveString wrapped) {
-        super(wrapped);
+    private final SensitiveString sensitiveString;
+
+    public MaskedSensitiveString(SensitiveString sensitiveString) {
+        this.sensitiveString = sensitiveString;
+    }
+
+    @Override
+    public char[] getValue() {
+        return new char[0];
     }
 
     @Override
     public String display() {
-        return "****" + new String(wrapped.getValue()).substring(Math.max(0, wrapped.getValue().length - 4));
+        int len = sensitiveString.getValue().length;
+        char[] mask = new char[len];
+        Arrays.fill(mask, '*');
+        return new String(mask);
     }
 
+    @Override
+    public void clear() {
+        sensitiveString.clear();
+    }
 }

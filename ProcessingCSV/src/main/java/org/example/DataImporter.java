@@ -24,7 +24,8 @@ class DataImporter {
         List<String[]> validData = new ArrayList<>();
 
         for (String[] data : employees) {
-            if (validator.validate(data)) {
+            boolean test = validator.validate(data);
+            if (test) {
                 processor.process(data);
                 validData.add(data);
             }

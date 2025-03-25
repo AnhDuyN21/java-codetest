@@ -1,4 +1,4 @@
-package org.example.validationChain;
+package org.example.validator;
 
 abstract class BaseValidator implements Validator {
     protected Validator next;

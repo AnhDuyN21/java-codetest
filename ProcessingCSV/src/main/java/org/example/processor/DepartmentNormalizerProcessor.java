@@ -1,4 +1,4 @@
-package org.example.processingChain;
+package org.example.processor;
 
 public class DepartmentNormalizerProcessor extends BaseProcessor {
     @Override

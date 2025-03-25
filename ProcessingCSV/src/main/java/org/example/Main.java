@@ -1,43 +1,47 @@
 package org.example;
 
-
-import lombok.val;
-import org.example.insertStrategy.InsertStrategy;
-import org.example.insertStrategy.JDBCInsertStrategy;
-import org.example.processingChain.*;
+import lombok.extern.slf4j.Slf4j;
+import org.example.dao.InsertStrategy;
+import org.example.dao.JDBCInsertStrategy;
+import org.example.processor.*;
 import org.example.util.DBConnectionUtil;
-import org.example.validationChain.*;
+import org.example.validator.*;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+@Slf4j
 public class Main {
-    public static void main(String[] args) throws Exception {
-        try (Connection connection = DBConnectionUtil.getConnection()) {
+    public static void main(String[] args) {
+        DataSource dataSource = DBConnectionUtil.getDataSource();
+
+        try (Connection connection = dataSource.getConnection()) {
             InsertStrategy strategy = new JDBCInsertStrategy(connection);
 
-            val requiredValidator = new RequiredFieldsValidator();
-            val emailValidator = new EmailValidator();
-            val salaryValidator = new SalaryValidator();
+            // Khởi tạo Validators
+            RequiredFieldsValidator requiredValidator = new RequiredFieldsValidator();
+            EmailValidator emailValidator = new EmailValidator();
+            SalaryValidator salaryValidator = new SalaryValidator();
 
-            val trimProcessor = new TrimProcessor();
-            val nameFormatterProcessor = new NameFormatterProcessor();
-            val departmentNormalizerProcessor = new DepartmentNormalizerProcessor();
+            // Khởi tạo Processors
+            TrimProcessor trimProcessor = new TrimProcessor();
+            NameFormatterProcessor nameFormatterProcessor = new NameFormatterProcessor();
+            DepartmentNormalizerProcessor departmentNormalizerProcessor = new DepartmentNormalizerProcessor();
 
             // Xây dựng chuỗi validator
             Validator validatorChain = ValidatorChain.builder()
-                    .add(requiredValidator)
-                    .add(emailValidator)
-                    .add(salaryValidator)
+                    .validator(requiredValidator)
+                    .validator(emailValidator)
+                    .validator(salaryValidator)
                     .build();
-
 
             // Xây dựng chuỗi processor
             Processor processingChain = ProcessorChain.builder()
-                    .add(trimProcessor)
-                    .add(nameFormatterProcessor)
-                    .add(departmentNormalizerProcessor)
+                    .processor(trimProcessor)
+                    .processor(nameFormatterProcessor)
+                    .processor(departmentNormalizerProcessor)
                     .build();
 
             // Đọc dữ liệu từ file CSV
@@ -47,10 +51,13 @@ public class Main {
             DataImporter importer = new DataImporter(validatorChain, processingChain, strategy);
             importer.importData(employees);
 
-            System.out.println("Nhập dữ liệu thành công!");
+            System.out.println("✅ Nhập dữ liệu thành công!");
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi kết nối database!");
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi khi xử lý dữ liệu!");
             e.printStackTrace();
         }
-
     }
 }

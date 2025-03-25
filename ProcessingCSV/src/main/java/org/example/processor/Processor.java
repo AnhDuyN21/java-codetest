@@ -1,6 +1,4 @@
-package org.example.processingChain;
-
-import org.example.Employee;
+package org.example.processor;
 
 public interface Processor {
     Processor setNext(Processor next);

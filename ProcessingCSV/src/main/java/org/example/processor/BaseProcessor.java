@@ -1,6 +1,4 @@
-package org.example.processingChain;
-
-import org.example.Employee;
+package org.example.processor;
 
 abstract class BaseProcessor implements Processor {
     protected Processor next;

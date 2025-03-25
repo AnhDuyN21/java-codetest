@@ -1,11 +1,13 @@
-package org.example.insertStrategy;
+package org.example.dao;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-
+@Slf4j
 public class JDBCInsertStrategy implements InsertStrategy {
     private final Connection connection;
 

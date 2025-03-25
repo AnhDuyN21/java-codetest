@@ -1,13 +1,12 @@
 package org.example;
 
-import org.example.insertStrategy.InsertStrategy;
-import org.example.processingChain.Processor;
-import org.example.validationChain.Validator;
+import org.example.dao.InsertStrategy;
+import org.example.processor.Processor;
+import org.example.validator.Validator;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class DataImporter {
     private Validator validator;
@@ -21,16 +20,21 @@ class DataImporter {
     }
 
     public void importData(List<String[]> employees) throws SQLException {
+        final int BATCH_SIZE = 100;
         List<String[]> validData = new ArrayList<>();
-
         for (String[] data : employees) {
-            boolean test = validator.validate(data);
-            if (test) {
+            if (validator.validate(data)) {
                 processor.process(data);
                 validData.add(data);
+                if (validData.size() == BATCH_SIZE) {
+                    strategy.insertData(validData);
+                    validData.clear();
+                }
             }
         }
-
-        strategy.insertData(validData);
+        if (!validData.isEmpty()) {
+            strategy.insertData(validData);
+            validData.clear();
+        }
     }
 }

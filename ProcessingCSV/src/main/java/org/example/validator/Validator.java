@@ -1,6 +1,4 @@
-package org.example.validationChain;
-
-import org.example.Employee;
+package org.example.validator;
 
 public interface Validator {
     Validator setNext(Validator next);

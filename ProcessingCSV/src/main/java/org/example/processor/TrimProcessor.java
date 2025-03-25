@@ -1,6 +1,4 @@
-package org.example.processingChain;
-
-import org.example.Employee;
+package org.example.processor;
 
 public class TrimProcessor extends BaseProcessor {
     @Override

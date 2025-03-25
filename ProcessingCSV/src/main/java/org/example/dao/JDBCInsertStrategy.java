@@ -1,13 +1,15 @@
-package org.example.insertStrategy;
+package org.example.dao;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-
+@Slf4j
 public class JDBCInsertStrategy implements InsertStrategy {
-    private Connection connection;
+    private final Connection connection;
 
     public JDBCInsertStrategy(Connection connection) {
         this.connection = connection;
@@ -16,23 +18,33 @@ public class JDBCInsertStrategy implements InsertStrategy {
     @Override
     public void insertData(List<String[]> batch) throws SQLException {
         String sql = "INSERT INTO Employee (id, name, email, salary, department) VALUES (?, ?, ?, ?, ?)";
+        int batchSize = 100; // Giới hạn batch size
+
+        // Tắt auto-commit để tối ưu hiệu suất
+        boolean autoCommit = connection.getAutoCommit();
+        connection.setAutoCommit(false);
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            int batchSize = 100; // Chia nhỏ batch để tránh quá tải
             int count = 0;
 
             for (String[] data : batch) {
                 try {
+                    System.out.println("📥 Đang insert: " + Arrays.toString(data));
+                    // Kiểm tra dữ liệu trước khi insert
+                    if (data.length < 5) {
+                        System.err.println("Dữ liệu không hợp lệ: " + Arrays.toString(data));
+                        continue;
+                    }
+
                     stmt.setString(1, data[0]); // id
                     stmt.setString(2, data[1]); // name
                     stmt.setString(3, data[2]); // email
-                    stmt.setInt(4, Integer.parseInt(data[3].trim())); // salary
+                    stmt.setFloat(4, Float.parseFloat(data[3].trim())); // salary
                     stmt.setString(5, data[4]); // department
                     stmt.addBatch();
-
                     count++;
 
-                    // Chạy batch sau mỗi batchSize rows để tránh tràn bộ nhớ
+                    // Chạy batch sau mỗi batchSize rows
                     if (count % batchSize == 0) {
                         stmt.executeBatch();
                         stmt.clearBatch();
@@ -42,13 +54,16 @@ public class JDBCInsertStrategy implements InsertStrategy {
                     e.printStackTrace();
                 }
             }
-            // Chạy nốt phần còn lại trong batch
+            // Chạy phần còn lại trong batch
             stmt.executeBatch();
-            connection.commit(); // Đảm bảo dữ liệu được lưu lại
+            connection.commit();
             System.out.println("✅ Insert batch thành công!");
         } catch (SQLException e) {
-            connection.rollback(); // Rollback nếu có lỗi lớn
+            connection.rollback();
             throw e;
+        } finally {
+            // Phục hồi lại trạng thái auto-commit ban đầu
+            connection.setAutoCommit(autoCommit);
         }
     }
 }

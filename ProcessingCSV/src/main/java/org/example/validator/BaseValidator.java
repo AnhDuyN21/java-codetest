@@ -1,6 +1,4 @@
-package org.example.validationChain;
-
-import org.example.Employee;
+package org.example.validator;
 
 abstract class BaseValidator implements Validator {
     protected Validator next;
@@ -14,6 +12,10 @@ abstract class BaseValidator implements Validator {
     @Override
     public boolean validate(String[] data)
     {
-        return next == null || next.validate(data);
+        if (next == null) {
+            return true;
+        } else {
+            return next.validate(data);
+        }
     }
 }

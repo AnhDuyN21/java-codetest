@@ -1,6 +1,4 @@
-package org.example.insertStrategy;
-
-import org.example.Employee;
+package org.example.dao;
 
 import java.sql.SQLException;
 import java.util.List;
